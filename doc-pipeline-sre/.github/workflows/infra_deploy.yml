@@ -1,0 +1,35 @@
+name: "Terraform - Infra Deployment"
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'infra/**'  # Roda quando há mudanças na pasta infra/
+  pull_request:
+    paths:
+      - 'infra/**'
+
+jobs:
+  terraform_plan:
+    name: "Terraform Plan"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.8.0
+
+      - name: 'Configure GCP Credentials'
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+          
+      - name: 'Terraform Init and Plan'
+        id: plan
+        run: |
+          # Inicializa o Terraform usando o backend GCS
+          terraform init -backend-config="bucket=seu-bucket-de-backend"
+          # Cria um plano para que ele seja revisado no Pull Request
+          terraform plan -input=false
+        working-directory: ./infra
