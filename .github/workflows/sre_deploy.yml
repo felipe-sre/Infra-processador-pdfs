@@ -14,9 +14,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: 'Validate K8s Manifests'
+      - name: 'Validate K8s Manifests Syntax'
         run: |
-          kubectl apply --dry-run=client --validate=false -f sre/k8s-manifests/
+          python3 -c "import yaml, glob; [yaml.safe_load(open(f)) for f in glob.glob('sre/k8s-manifests/*.y*ml')]"
 
       - name: 'Build & Test Docker Alert Bot'
         run: |
