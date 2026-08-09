@@ -100,13 +100,13 @@ data "archive_file" "lambda_dummy_zip" {
 }
 
 resource "aws_lambda_function" "pdf_processor" {
-  filename         = data.archive_file.lambda_dummy_zip.output_path
-  function_name    = "pdf-processor-${var.environment}"
-  role             = aws_iam_role.lambda_role.arn
-  handler          = "main.lambda_handler"
-  runtime          = "python3.11"
-  timeout          = 60
-  memory_size      = 256
+  filename      = data.archive_file.lambda_dummy_zip.output_path
+  function_name = "pdf-processor-${var.environment}"
+  role          = aws_iam_role.lambda_role.arn
+  handler       = "main.lambda_handler"
+  runtime       = "python3.11"
+  timeout       = 60
+  memory_size   = 256
 
   environment {
     variables = {
