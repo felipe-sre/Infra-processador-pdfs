@@ -1,6 +1,4 @@
-# ------------------------------------------------------------------------------
 # 1. ARMAZENAMENTO (S3 Buckets)
-# ------------------------------------------------------------------------------
 resource "aws_s3_bucket" "input_bucket" {
   bucket        = "${var.bucket_prefix}-input-${var.environment}"
   force_destroy = true
@@ -11,9 +9,7 @@ resource "aws_s3_bucket" "output_bucket" {
   force_destroy = true
 }
 
-# ------------------------------------------------------------------------------
 # 2. FILAS (SQS + Dead Letter Queue)
-# ------------------------------------------------------------------------------
 resource "aws_sqs_queue" "dlq" {
   name                      = "pdf-processing-dlq-${var.environment}"
   message_retention_seconds = 1209600 # 14 dias
@@ -29,9 +25,7 @@ resource "aws_sqs_queue" "pdf_queue" {
   })
 }
 
-# ------------------------------------------------------------------------------
 # 3. IAM ROLE E POLÍTICAS DA LAMBDA
-# ------------------------------------------------------------------------------
 resource "aws_iam_role" "lambda_role" {
   name = "pdf_processor_lambda_role_${var.environment}"
 
@@ -94,9 +88,7 @@ resource "aws_iam_role_policy_attachment" "lambda_s3" {
   policy_arn = aws_iam_policy.lambda_s3_policy.arn
 }
 
-# ------------------------------------------------------------------------------
 # 4. COMPUTAÇÃO (AWS Lambda)
-# ------------------------------------------------------------------------------
 data "archive_file" "lambda_dummy_zip" {
   type        = "zip"
   output_path = "${path.module}/dummy_lambda.zip"
