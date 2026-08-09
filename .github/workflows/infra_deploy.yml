@@ -46,3 +46,10 @@ jobs:
         run: |
           terraform apply -auto-approve -var-file="environments/dev/dev.tfvars"
         working-directory: ./infra
+
+      - name: 'Terraform Init & Validate'
+        run: |
+          terraform init -input=false
+          terraform fmt -check
+          terraform validate
+        working-directory: ./infra  
