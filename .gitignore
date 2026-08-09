@@ -1,18 +1,27 @@
 # Python
 *__pycache__/
 *.pyc
-*.log
+*.pyo
+*.pyd
+.pytest_cache/
 *.venv/
 *venv/
+*.log
 
 # Terraform
 .terraform/
 *.tfstate
 *.tfstate.*
+*.tfplan
 crash.log
 
-# IDEs (Visual Studio Code, etc.)
-.vscode/
+# Pacotes de Deploy da Lambda / Artefatos
+*.zip
 
-# Ambientes de Desenvolvimento
+# IDEs e Sistema
+.vscode/
+.idea/
+.DS_Store
+
+# Ambientes Temporários
 /tmp/

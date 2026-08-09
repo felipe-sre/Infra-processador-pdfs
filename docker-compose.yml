@@ -1,0 +1,71 @@
+version: '3.8'
+
+networks:
+  sre-network:
+    driver: bridge
+
+services:
+  prometheus:
+    image: prom/prometheus:v2.48.0
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./sre/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - sre-network
+
+  alertmanager:
+    image: prom/alertmanager:v0.26.0
+    container_name: alertmanager
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./sre/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+    networks:
+      - sre-network
+
+  grafana:
+    image: grafana/grafana:10.2.0
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - ./sre/grafana/provisioning:/etc/grafana/provisioning
+    networks:
+      - sre-network
+
+  loki:
+    image: grafana/loki:2.9.2
+    container_name: loki
+    ports:
+      - "3100:3100"
+    networks:
+      - sre-network
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.47.2
+    container_name: cadvisor
+    ports:
+      - "8080:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    networks:
+      - sre-network
+
+  docker-alert-bot:
+    build:
+      context: ./sre/alerting
+      dockerfile: Dockerfile
+    container_name: docker-alert-bot
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}
+    networks:
+      - sre-network
