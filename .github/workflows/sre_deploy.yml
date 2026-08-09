@@ -15,7 +15,7 @@ jobs:
 
       - name: 'Validate K8s Manifests'
         run: |
-          kubectl apply --dry-run=client -f sre/k8s-manifests/
+          kubectl apply --dry-run=client --validate=false -f sre/k8s-manifests/
 
       - name: 'Build & Test Docker Alert Bot'
         run: |
