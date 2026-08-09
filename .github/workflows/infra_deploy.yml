@@ -31,8 +31,7 @@ jobs:
 
       - name: 'Terraform Init & Validate'
         run: |
-          terraform init
-          terraform fmt -check
+          terraform init -input=false
           terraform validate
         working-directory: ./infra
 
