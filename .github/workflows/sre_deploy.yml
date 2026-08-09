@@ -16,7 +16,7 @@ jobs:
 
       - name: 'Validate K8s Manifests Syntax'
         run: |
-          python3 -c "import yaml, glob; [yaml.safe_load(open(f)) for f in glob.glob('sre/k8s-manifests/*.y*ml')]"
+          python3 -c "import yaml, glob; [list(yaml.safe_load_all(open(f))) for f in glob.glob('sre/k8s-manifests/*.y*ml')]"
 
       - name: 'Build & Test Docker Alert Bot'
         run: |
