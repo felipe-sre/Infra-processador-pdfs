@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - 'sre/**'
+      - '.github/workflows/sre_deploy.yml'
 
 jobs:
   sre_validation:
