@@ -1,35 +1,48 @@
-name: "Terraform - Infra Deployment"
+name: "Terraform - AWS Infra Deployment"
 
 on:
   push:
     branches:
       - main
     paths:
-      - 'infra/**'  # Roda quando há mudanças na pasta infra/
+      - 'infra/**'
   pull_request:
     paths:
       - 'infra/**'
 
 jobs:
-  terraform_plan:
-    name: "Terraform Plan"
+  terraform:
+    name: "Terraform Plan & Apply"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: hashicorp/setup-terraform@v3
+
+      - name: 'Setup Terraform'
+        uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.8.0
 
-      - name: 'Configure GCP Credentials'
-        uses: google-github-actions/auth@v2
+      - name: 'Configure AWS Credentials'
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
-          
-      - name: 'Terraform Init and Plan'
-        id: plan
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: 'Terraform Init & Validate'
         run: |
-          # Inicializa o Terraform usando o backend GCS
-          terraform init -backend-config="bucket=seu-bucket-de-backend"
-          # Cria um plano para que ele seja revisado no Pull Request
-          terraform plan -input=false
+          terraform init
+          terraform fmt -check
+          terraform validate
+        working-directory: ./infra
+
+      - name: 'Terraform Plan'
+        run: |
+          terraform plan -var-file="environments/dev/dev.tfvars"
+        working-directory: ./infra
+
+      - name: 'Terraform Apply'
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: |
+          terraform apply -auto-approve -var-file="environments/dev/dev.tfvars"
         working-directory: ./infra

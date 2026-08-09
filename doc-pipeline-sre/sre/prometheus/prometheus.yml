@@ -1,0 +1,40 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'dev-cluster'
+    environment: 'dev'
+
+# Configuração do Alertmanager
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - 'alertmanager:9093'
+
+# Regras de Alerta e SLOs (Opcional: apontar para arquivos de regras)
+rule_files:
+  # - "rules/slo_alerts.yml"
+
+# Coleta de Métricas (Scrape Jobs)
+scrape_configs:
+  # 1. Próprio Prometheus
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # 2. Alertmanager
+  - job_name: 'alertmanager'
+    static_configs:
+      - targets: ['alertmanager:9093']
+
+  # 3. Métricas de Contêineres Docker / K8s (cAdvisor)
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+
+  # 4. Apache Airflow (Orquestrador)
+  - job_name: 'airflow'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['airflow-webserver:8080']

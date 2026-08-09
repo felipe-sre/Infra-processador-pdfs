@@ -1,0 +1,67 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "title": "SLI: Latência P95 (Processamento da Lambda)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(sli_latency_seconds_bucket[5m])) by (le))",
+          "legendFormat": "P95 Latency (s)"
+        }
+      ]
+    },
+    {
+      "title": "SLO: Taxa de Erros (% em 5m)",
+      "type": "stat",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [
+        {
+          "expr": "(sum(rate(sli_latency_failure_total[5m])) / sum(rate(sli_latency_total[5m]))) * 100",
+          "legendFormat": "Error Rate %"
+        }
+      ]
+    },
+    {
+      "title": "Vazão do Pipeline (PDFs Processados/min)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "targets": [
+        {
+          "expr": "sum(rate(sli_latency_success_total[1m])) * 60",
+          "legendFormat": "Sucesso/min"
+        }
+      ]
+    },
+    {
+      "title": "Incidentes: Mensagens na DLQ (Dead Letter Queue)",
+      "type": "stat",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "targets": [
+        {
+          "expr": "aws_sqs_approximate_number_of_messages_visible{queue_name=~\".*dlq.*\"}",
+          "legendFormat": "Mensagens Retidas"
+        }
+      ]
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["sre", "slo", "pdf-pipeline", "aws"],
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "title": "PDF Pipeline - SLO & Confiabilidade SRE",
+  "uid": "pdf-pipeline-slo-dashboard"
+}

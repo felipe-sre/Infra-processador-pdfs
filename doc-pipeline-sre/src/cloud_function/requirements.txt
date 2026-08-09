@@ -1,9 +1,0 @@
-# Dependências de Manipulação e Extração de PDF
-pypdf
-pdfplumber
-Pillow
-
-# Dependências do Google Cloud (GCP)
-# Essenciais para interagir com o pipeline: ler do GCS e publicar em filas.
-google-cloud-storage
-google-cloud-pubsub

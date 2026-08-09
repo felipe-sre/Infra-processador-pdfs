@@ -1,34 +1,23 @@
-name: "SRE - Kubernetes Deployment"
+name: "SRE - Observability & Alert Bot CI"
 
 on:
   push:
     branches:
       - main
     paths:
-      - 'sre/**' # Roda quando há mudanças na pasta sre/
+      - 'sre/**'
 
 jobs:
-  deploy_k8s_manifests:
+  sre_validation:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
-      - name: 'Configure GCP Credentials'
-        uses: google-github-actions/auth@v2
-        with:
-          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
 
-      - name: 'Get GKE Credentials'
-        uses: google-github-actions/get-gke-credentials@v2
-        with:
-          cluster_name: seu-cluster-gke-sre
-          location: sua-regiao
-          project_id: seu-project-id
-          
-      - name: 'Deploy SRE Stack (Prometheus, Grafana, Loki)'
+      - name: 'Validate K8s Manifests'
         run: |
-          # Aplica os manifestos do Kubernetes
-          kubectl apply -f sre/k8s-manifests/
-          
-          # Copia arquivos de configuração (prometheus.yml, etc.) para o ConfigMap
-          # (Passo a ser detalhado na fase de implementação do GKE)
+          kubectl apply --dry-run=client -f sre/k8s-manifests/
+
+      - name: 'Build & Test Docker Alert Bot'
+        run: |
+          cd sre/alerting
+          docker build -t docker-alert-bot:latest .

@@ -1,38 +1,44 @@
-name: "Code - Cloud Function & Airflow DAGs Deployment"
+name: "Code - AWS Lambda & Airflow DAGs Deployment"
 
 on:
   push:
     branches:
       - main
     paths:
-      - 'src/**'  # Roda quando há mudanças na pasta src/
+      - 'src/**'
 
 jobs:
   test_and_deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
-      - name: 'Run Python Tests'
-        run: |
-          pip install -r src/cloud_function/requirements.txt
-          pytest src/cloud_function/tests/
-          
-      - name: 'Configure GCP Credentials'
-        uses: google-github-actions/auth@v2
-        with:
-          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
 
-      - name: 'Deploy Cloud Function'
-        uses: google-github-actions/deploy-cloud-functions@v2
+      - name: 'Set up Python'
+        uses: actions/setup-python@v5
         with:
-          name: pdf-processor-function
-          source_dir: src/cloud_function/
-          runtime: python311
-          # ... (outras configurações da Cloud Function)
-          
-      - name: 'Upload Airflow DAGs to Composer'
-        uses: google-github-actions/upload-cloud-storage@v2
+          python-version: '3.11'
+
+      - name: 'Run Python Tests for Lambda'
+        run: |
+          pip install -r src/processor/requirements.txt pytest
+          pytest src/processor/tests/
+
+      - name: 'Validate Airflow DAG Syntax'
+        run: |
+          python -m py_compile src/airflow/dags/document_pipeline_dag.py
+
+      - name: 'Configure AWS Credentials'
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          path: src/composer/dags/document_pipeline_dag.py
-          destination: seu-bucket-composer/dags/
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: 'Package & Deploy AWS Lambda'
+        run: |
+          cd src/processor
+          zip -r ../../lambda_payload.zip main.py requirements.txt
+          cd ../..
+          aws lambda update-function-code \
+            --function-name pdf-processor-dev \
+            --zip-file fileb://lambda_payload.zip
